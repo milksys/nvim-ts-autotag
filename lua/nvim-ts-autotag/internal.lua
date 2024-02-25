@@ -14,7 +14,8 @@ M.tbl_filetypes = {
     'markdown',
     'astro', 'glimmer', 'handlebars', 'hbs',
     'htmldjango',
-    'eruby'
+    'eruby',
+    'templ',
 }
 
 -- stylua: ignore
@@ -90,10 +91,25 @@ local SVELTE_TAG = {
     skip_tag_pattern       = { 'quoted_attribute_value', 'end_tag' },
 }
 
+local TEMPL_TAG = {
+    filetypes = {
+        "templ",
+    },
+    start_tag_pattern = { "tag_start" },
+    start_name_tag_pattern = { "element_identifier" },
+    end_tag_pattern = { "tag_end" },
+    end_name_tag_pattern = { "element_identifier" },
+    close_tag_pattern = { "erroneous_end_tag" },
+    close_name_tag_pattern = { "erroneous_end_tag_name" },
+    element_tag = { "element" },
+    skip_tag_pattern = { "quoted_attribute_value", "tag_end" },
+}
+
 local all_tag = {
     HBS_TAG,
     SVELTE_TAG,
     JSX_TAG,
+    TEMPL_TAG,
 }
 M.enable_rename = true
 M.enable_close = true
@@ -106,7 +122,7 @@ M.setup = function(opts)
     if opts.enable_rename ~= nil then
         M.enable_rename = opts.enable_rename
     end
-    if opts.enable_close then
+    if opts.enable_close ~= nil then
         M.enable_close = opts.enable_close
     end
     if opts.enable_close_on_slash ~= nil then
@@ -591,8 +607,8 @@ M.attach = function(bufnr, lang)
     end
 end
 
-M.detach = function()
-    local bufnr = vim.api.nvim_get_current_buf()
+M.detach = function(bufnr)
+    local bufnr = tonumber(bufnr) or vim.api.nvim_get_current_buf()
     buffer_tag[bufnr] = nil
 end
 
